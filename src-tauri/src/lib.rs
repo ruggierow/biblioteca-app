@@ -64,6 +64,18 @@ fn carregar_biblioteca() -> Vec<Livro> {
 }
 
 #[tauri::command]
+fn fazer_backup(sufixo: String) -> Result<String, String> {
+    let origem = caminho_arquivo();
+    if !origem.exists() {
+        return Err("Arquivo biblioteca.txt não encontrado.".to_string());
+    }
+    let pasta = origem.parent().unwrap_or_else(|| std::path::Path::new("."));
+    let destino = pasta.join(format!("biblioteca_{}.txt", sufixo));
+    fs::copy(&origem, &destino).map_err(|e| e.to_string())?;
+    Ok(destino.to_string_lossy().to_string())
+}
+
+#[tauri::command]
 fn salvar_biblioteca(livros: Vec<Livro>) -> Result<(), String> {
     let conteudo: String = livros
         .iter()
@@ -91,6 +103,7 @@ pub fn run() {
             carregar_biblioteca,
             salvar_biblioteca,
             obter_caminho_arquivo,
+            fazer_backup,
         ])
         .run(tauri::generate_context!())
         .expect("erro ao iniciar a aplicação");

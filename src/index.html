@@ -906,6 +906,7 @@
                 <button type="button" id="btn-desvincular" class="btn-ghost" style="display:none;">Desvincular</button>
                 <button type="button" id="btn-importar" class="btn-ghost">Importar (avulso)</button>
                 <button type="button" id="btn-exportar" class="btn-accent">Exportar (avulso)</button>
+                <button type="button" id="btn-backup" class="btn-ghost">Backup</button>
                 <button type="button" id="btn-limpar-tudo" class="btn-danger">Apagar tudo</button>
                 <button type="button" id="btn-encerrar" class="btn-ghost">Encerrar</button>
                 <input type="file" id="arquivo-importar" accept=".txt,.tsv,text/plain" style="display:none">
@@ -978,6 +979,67 @@
     </div>
 
     <div id="toast"></div>
+
+    <!-- Modal de primeiro uso -->
+    <div id="modal-primeiro-uso" style="display:none; position:fixed; inset:0; background:rgba(20,30,60,0.6); z-index:9001; align-items:center; justify-content:center; padding:20px;">
+        <div style="background:#fff; border-radius:16px; padding:32px; max-width:440px; width:100%; box-shadow:0 20px 60px rgba(0,0,0,0.3); font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+            <div style="text-align:center; margin-bottom:20px;">
+                <div style="font-size:48px; margin-bottom:10px;">📚</div>
+                <h2 style="font-size:18px; font-weight:700; color:#1e3a5f; margin:0 0 6px;">Bem-vindo ao Sistema de Biblioteca!</h2>
+                <p style="font-size:13px; color:#6b7280; margin:0;">Primeira abertura detectada. Como deseja armazenar seus livros?</p>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:20px;">
+                <button id="btn-puso-vincular" style="display:flex; align-items:flex-start; gap:14px; background:#f0f5ff; border:2px solid #2b5fb3; border-radius:10px; padding:14px 16px; cursor:pointer; text-align:left; width:100%;">
+                    <span style="font-size:22px; flex-shrink:0;">📁</span>
+                    <div>
+                        <div style="font-size:13px; font-weight:700; color:#1e3a5f;">Selecionar ou criar arquivo</div>
+                        <div style="font-size:12px; color:#4b5563; margin-top:2px;">Escolhe onde salvar o <code style="background:#e8edf8;padding:1px 4px;border-radius:3px;">biblioteca.txt</code> no seu computador. Recomendado.</div>
+                    </div>
+                </button>
+                <button id="btn-puso-importar" style="display:flex; align-items:flex-start; gap:14px; background:#f0fdf4; border:2px solid #1e8a5f; border-radius:10px; padding:14px 16px; cursor:pointer; text-align:left; width:100%;">
+                    <span style="font-size:22px; flex-shrink:0;">📥</span>
+                    <div>
+                        <div style="font-size:13px; font-weight:700; color:#166b48;">Importar arquivo existente</div>
+                        <div style="font-size:12px; color:#4b5563; margin-top:2px;">Já tem um <code style="background:#e8f5ee;padding:1px 4px;border-radius:3px;">biblioteca.txt</code> de outra instalação? Importe-o aqui.</div>
+                    </div>
+                </button>
+                <button id="btn-puso-depois" style="display:flex; align-items:flex-start; gap:14px; background:#f9fafb; border:2px solid #e2e6ee; border-radius:10px; padding:14px 16px; cursor:pointer; text-align:left; width:100%;">
+                    <span style="font-size:22px; flex-shrink:0;">⏭</span>
+                    <div>
+                        <div style="font-size:13px; font-weight:700; color:#374151;">Decidir depois</div>
+                        <div style="font-size:12px; color:#4b5563; margin-top:2px;">Os dados ficam salvos apenas no navegador. Você pode vincular um arquivo a qualquer momento.</div>
+                    </div>
+                </button>
+            </div>
+            <p style="font-size:11px; color:#9ca3af; text-align:center; margin:0;">
+                💡 O arquivo <code>biblioteca.txt</code> é compatível com o programa em C++ e pode ser usado nos dois.
+            </p>
+        </div>
+    </div>
+
+
+    <!-- Modal de aviso de compatibilidade com navegador -->
+    <div id="modal-navegador" style="display:none; position:fixed; inset:0; background:rgba(20,30,60,0.55); z-index:9000; align-items:center; justify-content:center; padding:20px;">
+        <div style="background:#fff; border-radius:16px; padding:28px 32px; max-width:440px; width:100%; box-shadow:0 20px 60px rgba(0,0,0,0.3); font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+            <div style="display:flex; align-items:center; gap:12px; margin-bottom:16px;">
+                <span style="font-size:28px;">⚠️</span>
+                <h2 style="font-size:16px; font-weight:700; color:#1e3a5f; margin:0;">Aviso de Compatibilidade</h2>
+            </div>
+            <p style="font-size:13px; color:#374151; margin:0 0 12px; line-height:1.6;">
+                Você está usando o <strong id="nome-navegador-aviso"></strong>. Este navegador tem as seguintes limitações com este programa:
+            </p>
+            <ul id="lista-limitacoes-navegador" style="font-size:13px; color:#374151; margin:0 0 18px; padding-left:20px; line-height:1.8;"></ul>
+            <p style="font-size:12px; color:#6b7280; margin:0 0 20px;">
+                Para uso completo, prefira o <strong>Google Chrome</strong>, <strong>Firefox</strong> ou o <strong>aplicativo instalável</strong> (Biblioteca.app).
+            </p>
+            <div style="display:flex; justify-content:flex-end; gap:10px;">
+                <label style="display:flex; align-items:center; gap:6px; font-size:12px; color:#6b7280; cursor:pointer; margin-right:auto;">
+                    <input type="checkbox" id="chk-nao-mostrar-aviso"> Não mostrar novamente
+                </label>
+                <button onclick="fecharModalNavegador()" style="background:#2b5fb3; color:#fff; border:none; border-radius:8px; padding:9px 22px; font-size:13px; font-weight:600; cursor:pointer;">Entendido</button>
+            </div>
+        </div>
+    </div>
 
     <script>
         // =====================================================================
@@ -2270,97 +2332,82 @@
         document.getElementById("btn-encerrar").addEventListener("click", encerrarInterface);
         document.getElementById("btn-encerrar-topo").addEventListener("click", encerrarInterface);
 
-        document.getElementById("btn-limpar-tudo").addEventListener("click", () => {
-            if (biblioteca.length === 0) { toast("Nada a apagar."); return; }
-            if (confirm(`Apagar todos os ${biblioteca.length} livro(s)? Esta acao nao pode ser desfeita.`)) {
-                biblioteca = [];
-                salvar();
-                atualizarTudo();
-                toast("Biblioteca limpa.");
-            }
-        });
 
-        // === Edicao via seletor dedicado ===
-        document.getElementById("edit-busca").addEventListener("input", renderizarSeletorEdicao);
 
-        document.getElementById("btn-abrir-edicao").addEventListener("click", () => {
-            const seletor = document.getElementById("edit-seletor");
-            const valor = seletor.value;
-            if (!valor) {
-                toast("Selecione um livro para editar.");
-                return;
-            }
-            const indice = parseInt(valor, 10);
-            if (Number.isNaN(indice) || !biblioteca[indice]) {
-                toast("Livro invalido.");
-                return;
-            }
-            abrirEdicao(indice);
-        });
 
-        // === Filtro interno da secao Temas e Autores ===
-        function filtrarChips() {
-            const ft = normalizar(document.getElementById("filtro-chip-tema").value);
-            const fa = normalizar(document.getElementById("filtro-chip-autor").value);
-            document.querySelectorAll("#lista-temas .chip").forEach(chip => {
-                chip.style.display = (ft && !normalizar(chip.dataset.valor || "").includes(ft)) ? "none" : "";
+        // === Assistente de primeiro uso ===
+        (function verificarPrimeiroUso() {
+            if (window.__TAURI__) return; // Tauri cria o arquivo automaticamente
+            const jaUsou = localStorage.getItem(STORAGE_KEY) !== null
+                        || localStorage.getItem("biblioteca-primeiro-uso-concluido") === "1";
+            if (jaUsou) return;
+
+            const modal = document.getElementById("modal-primeiro-uso");
+            modal.style.display = "flex";
+
+            function fechar() {
+                modal.style.display = "none";
+                localStorage.setItem("biblioteca-primeiro-uso-concluido", "1");
+            }
+
+            document.getElementById("btn-puso-vincular").addEventListener("click", () => {
+                fechar();
+                setTimeout(() => document.getElementById("btn-vincular").click(), 100);
             });
-            document.querySelectorAll("#lista-autores .chip").forEach(chip => {
-                chip.style.display = (fa && !normalizar(chip.dataset.valor || "").includes(fa)) ? "none" : "";
+            document.getElementById("btn-puso-importar").addEventListener("click", () => {
+                fechar();
+                setTimeout(() => document.getElementById("btn-importar").click(), 100);
             });
-        }
-        document.getElementById("filtro-chip-tema").addEventListener("input", filtrarChips);
-        document.getElementById("filtro-chip-autor").addEventListener("input", filtrarChips);
+            document.getElementById("btn-puso-depois").addEventListener("click", fechar);
+        })();
 
-        // === Clique em chip de tema/autor filtra a lista ===
-        document.querySelector(".colunas-2").addEventListener("click", (e) => {
-            const chip = e.target.closest(".chip");
-            if (!chip) return;
-            const tipo = chip.dataset.tipo;
-            const valor = chip.dataset.valor;
+        // === Backup ===
+        document.getElementById("btn-backup").addEventListener("click", async () => {
+            if (biblioteca.length === 0) { toast("Nada para fazer backup."); return; }
+            const agora = new Date();
+            const sufixo = agora.getFullYear()
+                + "-" + String(agora.getMonth()+1).padStart(2,"0")
+                + "-" + String(agora.getDate()).padStart(2,"0")
+                + "_" + String(agora.getHours()).padStart(2,"0")
+                + "h" + String(agora.getMinutes()).padStart(2,"0");
+            const nome = "biblioteca_" + sufixo + ".txt";
 
-            ["filtro-titulo", "filtro-autor", "filtro-tema", "filtro-local"].forEach(id => document.getElementById(id).value = "");
-            document.getElementById("filtro-status").value = "todos";
-
-            if (tipo === "tema") {
-                document.getElementById("filtro-tema").value = valor;
-            } else if (tipo === "autor") {
-                document.getElementById("filtro-autor").value = valor;
+            if (window.__TAURI__) {
+                // App instalável: Rust salva na mesma pasta do biblioteca.txt
+                try {
+                    const caminho = await window.__TAURI__.core.invoke('fazer_backup', { sufixo });
+                    toast("Backup salvo: " + caminho.split(/[\\/]/).pop());
+                } catch (e) {
+                    toast("Erro no backup: " + e);
+                }
+            } else if ('showSaveFilePicker' in window) {
+                // Browser com File System Access API: abre diálogo já na pasta do arquivo vinculado
+                const opts = {
+                    suggestedName: nome,
+                    types: [{ description: "Arquivo de texto", accept: { "text/plain": [".txt"] } }],
+                };
+                if (arquivoHandle) opts.startIn = arquivoHandle;
+                try {
+                    const handle = await window.showSaveFilePicker(opts);
+                    const writable = await handle.createWritable();
+                    await writable.write(serializarTSV());
+                    await writable.close();
+                    toast("Backup salvo: " + handle.name);
+                } catch (e) {
+                    if (e.name !== "AbortError") toast("Erro ao salvar backup: " + e.message);
+                }
+            } else {
+                // Fallback (Safari): baixa para Downloads
+                const blob = new Blob([serializarTSV()], { type: "text/plain" });
+                const a = document.createElement("a");
+                a.href = URL.createObjectURL(blob);
+                a.download = nome;
+                a.click();
+                URL.revokeObjectURL(a.href);
+                toast("Backup baixado para Downloads: " + nome);
             }
-
-            executarPesquisa();
-            document.querySelector(".card:has(#tabela-container)")?.scrollIntoView({ behavior: "smooth", block: "start" });
         });
 
-        // === Botoes "+ Adicionar" para autores e temas (cadastro e edicao) ===
-        function ligarBotaoAdicionar(seletor, tipo) {
-            document.querySelectorAll(seletor).forEach(botao => {
-                botao.addEventListener("click", () => {
-                    const containerId = botao.dataset.target;
-                    const container = document.getElementById(containerId);
-                    const novaLinha = criarLinhaCampo("", containerId, tipo);
-                    container.appendChild(novaLinha);
-                    novaLinha.querySelector("input").focus();
-                });
-            });
-        }
-        ligarBotaoAdicionar(".btn-add-autor", "autor");
-        ligarBotaoAdicionar(".btn-add-tema", "tema");
-
-        // === Persistencia do estado "aberto/fechado" da secao Temas e Autores ===
-        const ESTADO_CATEGORIAS = "categorias-aberto";
-        const detailsCategorias = document.getElementById("categorias-details");
-        const estadoSalvo = localStorage.getItem(ESTADO_CATEGORIAS);
-        if (estadoSalvo === "false") detailsCategorias.open = false;
-        detailsCategorias.addEventListener("toggle", () => {
-            localStorage.setItem(ESTADO_CATEGORIAS, detailsCategorias.open ? "true" : "false");
-        });
-
-        popularCampos("autores-container", [], "autor");
-        popularCampos("temas-container", [], "tema");
-        atualizarTudo();
-
-        // === Recuperacao por JSON ===
         document.getElementById("btn-backup-json").addEventListener("click", () => {
             const conteudo = JSON.stringify(biblioteca, null, 2);
             const blob = new Blob([conteudo], { type: "application/json;charset=utf-8" });
@@ -2459,6 +2506,45 @@
                 atualizarBannerSync("desvinculado");
             }
         })();
+
+        // ── Aviso de compatibilidade com navegador ──────────────────────────
+        (function verificarNavegador() {
+            if (window.__TAURI__) return;
+
+            const CHAVE_AVISO = "biblioteca-aviso-navegador-dispensado";
+            if (localStorage.getItem(CHAVE_AVISO) === "1") return;
+
+            const ua = navigator.userAgent;
+            const vendor = navigator.vendor || "";
+            const eSafari = /Safari/i.test(ua) && !/Chrome|Chromium|Edg/i.test(ua) && /Apple/i.test(vendor);
+
+            if (!eSafari) return;
+
+            const limitacoes = [
+                "O botão <strong>Encerrar</strong> não consegue fechar a aba — use <kbd style='background:#f3f4f6;border:1px solid #d1d5db;border-radius:4px;padding:1px 5px;font-size:11px;'>⌘ W</kbd> para fechar manualmente.",
+                "O vínculo com o arquivo <code style='background:#f3f4f6;font-size:11px;padding:1px 4px;border-radius:3px;'>biblioteca.txt</code> não é lembrado entre sessões — será necessário vincular novamente a cada abertura."
+            ];
+
+            document.getElementById("nome-navegador-aviso").textContent = "Safari";
+            const ul = document.getElementById("lista-limitacoes-navegador");
+            limitacoes.forEach(txt => {
+                const li = document.createElement("li");
+                li.innerHTML = txt;
+                ul.appendChild(li);
+            });
+
+            const modal = document.getElementById("modal-navegador");
+            modal.style.display = "flex";
+        })();
+
+        function fecharModalNavegador() {
+            const modal = document.getElementById("modal-navegador");
+            modal.style.display = "none";
+            if (document.getElementById("chk-nao-mostrar-aviso").checked) {
+                try { localStorage.setItem("biblioteca-aviso-navegador-dispensado", "1"); } catch(e) {}
+            }
+        }
+
     </script>
 </body>
 </html>
