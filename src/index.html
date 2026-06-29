@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Gestao de Biblioteca</title>
+    <link rel="icon" type="image/png" href="data:image/png;base64,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">
+    <style>
+        :root {
+            --bg: #f4f6fb;
+            --surface: #ffffff;
+            --primary: #2b5fb3;
+            --primary-hover: #214a8c;
+            --accent: #1e8a5f;
+            --accent-hover: #166b48;
+            --danger: #c0392b;
+            --danger-hover: #9d2d22;
+            --muted: #6b7280;
+            --border: #e2e6ee;
+            --text: #1f2937;
+            --shadow: 0 4px 16px rgba(20, 30, 60, 0.06);
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.5;
+        }
+
+        header {
+            background: linear-gradient(135deg, #2b5fb3, #1e8a5f);
+            color: #fff;
+            padding: 24px 32px;
+            box-shadow: var(--shadow);
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 22px;
+            font-weight: 600;
+        }
+
+        header p {
+            margin: 4px 0 0;
+            opacity: 0.85;
+            font-size: 13px;
+        }
+
+        main {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 24px 32px 64px;
+        }
+
+        .card {
+            background: var(--surface);
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            padding: 20px 24px;
+            margin-bottom: 20px;
+        }
+
+        .card h2 {
+            margin: 0 0 16px;
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 12px;
+        }
+
+        label {
+            display: block;
+            font-size: 12px;
+            color: var(--muted);
+            margin-bottom: 4px;
+            font-weight: 500;
+        }
+
+        input[type="text"], input[type="number"], select {
+            width: 100%;
+            padding: 8px 10px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 14px;
+            background: #fff;
+            transition: border-color 0.15s, box-shadow 0.15s;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(43, 95, 179, 0.15);
+        }
+
+        .button-row {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 12px;
+        }
+
+        button {
+            font-family: inherit;
+            font-size: 14px;
+            font-weight: 500;
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            transition: background 0.15s, transform 0.05s;
+        }
+
+        button:active { transform: translateY(1px); }
+
+        .btn-primary { background: var(--primary); color: #fff; }
+        .btn-primary:hover { background: var(--primary-hover); }
+
+        .btn-accent { background: var(--accent); color: #fff; }
+        .btn-accent:hover { background: var(--accent-hover); }
+
+        .btn-ghost {
+            background: transparent;
+            color: var(--primary);
+            border: 1px solid var(--border);
+        }
+        .btn-ghost:hover { background: #eef3fb; }
+
+        .btn-danger { background: var(--danger); color: #fff; }
+        .btn-danger:hover { background: var(--danger-hover); }
+
+        .btn-small {
+            font-size: 12px;
+            padding: 5px 10px;
+            border-radius: 6px;
+        }
+
+        .toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: flex-end;
+        }
+
+        .toolbar .field {
+            flex: 1;
+            min-width: 160px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        thead th {
+            text-align: left;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            padding: 10px 12px;
+            border-bottom: 1px solid var(--border);
+            background: #fafbfd;
+        }
+
+        tbody td {
+            padding: 12px;
+            border-bottom: 1px solid var(--border);
+            vertical-align: middle;
+        }
+
+        tbody tr:hover { background: #f7f9fd; }
+
+        .status-pill {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .status-disponivel { background: #e6f5ee; color: #166b48; }
+        .status-emprestado { background: #fde9e7; color: #9d2d22; }
+
+        .actions {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .empty {
+            text-align: center;
+            padding: 32px;
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+        .counter {
+            font-size: 12px;
+            color: var(--muted);
+            font-weight: 400;
+        }
+
+        /* Modal */
+        .modal-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(20, 30, 60, 0.45);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+        }
+
+        .modal-backdrop.active { display: flex; }
+
+        .modal {
+            background: var(--surface);
+            border-radius: 12px;
+            padding: 24px;
+            width: min(92vw, 480px);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+        }
+
+        .modal h3 { margin: 0 0 16px; font-size: 17px; }
+
+        .modal .form-grid { grid-template-columns: 1fr; }
+
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+            margin-top: 16px;
+        }
+
+        /* Toast */
+        #toast {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            background: #1f2937;
+            color: #fff;
+            padding: 10px 18px;
+            border-radius: 8px;
+            font-size: 14px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s, transform 0.2s;
+            z-index: 200;
+        }
+
+        #toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        @media print {
+            header, .card.no-print, .actions, .toolbar, .button-row { display: none !important; }
+            body { background: #fff; }
+            main { padding: 0; }
+            .card { box-shadow: none; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div style="display:flex; align-items:center; gap:20px;">
+            <img src="data:image/png;base64,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"
+                 alt="Biblioteca"
+                 style="width:60px; height:60px; border-radius:22%; box-shadow:0 3px 10px rgba(0,0,0,0.25); background:rgba(255,255,255,0.12); padding:5px; flex-shrink:0;">
+            <div>
+                <h1>Sistema de Gestao de Biblioteca</h1>
+                <p>Interface web compativel com o arquivo <code>biblioteca.txt</code> (TSV)</p>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <section class="card no-print">
+            <h2>Cadastrar livro</h2>
+            <form id="form-cadastro">
+                <div class="form-grid">
+                    <div>
+                        <label for="titulo">Titulo</label>
+                        <input type="text" id="titulo" required>
+                    </div>
+                    <div>
+                        <label for="autor">Autor</label>
+                        <input type="text" id="autor" required>
+                    </div>
+                    <div>
+                        <label for="tema">Tema</label>
+                        <input type="text" id="tema" required>
+                    </div>
+                    <div>
+                        <label for="ano">Ano</label>
+                        <input type="number" id="ano" min="0" required>
+                    </div>
+                </div>
+                <div class="button-row">
+                    <button type="submit" class="btn-primary">Cadastrar</button>
+                    <button type="reset" class="btn-ghost">Limpar</button>
+                </div>
+            </form>
+        </section>
+
+        <section class="card no-print">
+            <h2>Pesquisar e filtrar</h2>
+            <div class="toolbar">
+                <div class="field">
+                    <label for="filtro-titulo">Titulo (parcial)</label>
+                    <input type="text" id="filtro-titulo" placeholder="Ex.: dom casm">
+                </div>
+                <div class="field">
+                    <label for="filtro-autor">Autor (parcial)</label>
+                    <input type="text" id="filtro-autor" placeholder="Ex.: machado">
+                </div>
+                <div class="field">
+                    <label for="filtro-tema">Tema (parcial)</label>
+                    <input type="text" id="filtro-tema" placeholder="Ex.: romance">
+                </div>
+                <div class="field" style="flex: 0 0 160px;">
+                    <label for="filtro-status">Status</label>
+                    <select id="filtro-status">
+                        <option value="todos">Todos</option>
+                        <option value="disponivel">Disponiveis</option>
+                        <option value="emprestado">Emprestados</option>
+                    </select>
+                </div>
+                <button type="button" id="btn-pesquisar" class="btn-primary">Pesquisar</button>
+                <button type="button" id="btn-limpar-filtros" class="btn-ghost">Limpar filtros</button>
+            </div>
+        </section>
+
+        <section class="card no-print">
+            <h2>Importar / Exportar</h2>
+            <p style="margin:0 0 12px; color: var(--muted); font-size: 13px;">
+                O formato e identico ao usado pelo programa em C++: campos separados por TAB e flag <code>1</code>/<code>0</code> para emprestado.
+            </p>
+            <div class="button-row">
+                <button type="button" id="btn-importar" class="btn-primary">Importar biblioteca.txt</button>
+                <button type="button" id="btn-exportar" class="btn-accent">Exportar biblioteca.txt</button>
+                <button type="button" id="btn-limpar-tudo" class="btn-danger">Apagar tudo</button>
+                <button type="button" id="btn-encerrar" class="btn-ghost">Encerrar</button>
+                <input type="file" id="arquivo-importar" accept=".txt,.tsv,text/plain" style="display:none">
+            </div>
+        </section>
+
+        <section class="card">
+            <h2>
+                Lista de livros
+                <span class="counter" id="contador"></span>
+            </h2>
+            <div id="tabela-container"></div>
+        </section>
+    </main>
+
+    <!-- Modal de edicao -->
+    <div class="modal-backdrop" id="modal-backdrop">
+        <div class="modal">
+            <h3>Editar livro</h3>
+            <form id="form-edicao">
+                <input type="hidden" id="edit-indice">
+                <div class="form-grid">
+                    <div>
+                        <label for="edit-titulo">Titulo</label>
+                        <input type="text" id="edit-titulo" required>
+                    </div>
+                    <div>
+                        <label for="edit-autor">Autor</label>
+                        <input type="text" id="edit-autor" required>
+                    </div>
+                    <div>
+                        <label for="edit-tema">Tema</label>
+                        <input type="text" id="edit-tema" required>
+                    </div>
+                    <div>
+                        <label for="edit-ano">Ano</label>
+                        <input type="number" id="edit-ano" min="0" required>
+                    </div>
+                    <div>
+                        <label for="edit-emprestado">Status</label>
+                        <select id="edit-emprestado">
+                            <option value="0">Disponivel</option>
+                            <option value="1">Emprestado</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-ghost" id="btn-cancelar-edicao">Cancelar</button>
+                    <button type="submit" class="btn-primary">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="toast"></div>
+
+    <script>
+        let biblioteca = [];
+
+        const normalizar = (texto) => (texto || "").toString().toLowerCase();
+
+
+
+        function salvar() {
+            if (window.__TAURI__) {
+                window.__TAURI__.core.invoke('salvar_biblioteca', { livros: biblioteca })
+                    .catch(e => console.error('Erro ao salvar:', e));
+            }
+        }
+
+        // Inicialização assíncrona: carrega do ficheiro via Tauri
+        (async function inicializar() {
+            if (window.__TAURI__) {
+                try {
+                    biblioteca = await window.__TAURI__.core.invoke('carregar_biblioteca');
+                    const caminho = await window.__TAURI__.core.invoke('obter_caminho_arquivo');
+                    document.title = 'Biblioteca — ' + caminho.split(/[\/]/).pop();
+                } catch (e) {
+                    console.error('Erro ao carregar biblioteca:', e);
+                }
+            }
+            renderizar();
+        })();
+
+        function toast(mensagem) {
+            const el = document.getElementById("toast");
+            el.textContent = mensagem;
+            el.classList.add("show");
+            clearTimeout(toast._t);
+            toast._t = setTimeout(() => el.classList.remove("show"), 2200);
+        }
+
+        function aplicarFiltros() {
+            const t = normalizar(document.getElementById("filtro-titulo").value);
+            const a = normalizar(document.getElementById("filtro-autor").value);
+            const tm = normalizar(document.getElementById("filtro-tema").value);
+            const status = document.getElementById("filtro-status").value;
+
+            return biblioteca
+                .map((livro, indice) => ({ livro, indice }))
+                .filter(({ livro }) => {
+                    if (t && !normalizar(livro.titulo).includes(t)) return false;
+                    if (a && !normalizar(livro.autor).includes(a)) return false;
+                    if (tm && !normalizar(livro.tema).includes(tm)) return false;
+                    if (status === "disponivel" && livro.emprestado) return false;
+                    if (status === "emprestado" && !livro.emprestado) return false;
+                    return true;
+                });
+        }
+
+        function renderizar() {
+            const filtrados = aplicarFiltros();
+            const container = document.getElementById("tabela-container");
+            const contador = document.getElementById("contador");
+
+            contador.textContent = `${filtrados.length} de ${biblioteca.length} livro(s)`;
+
+            if (filtrados.length === 0) {
+                container.innerHTML = `<div class="empty">${biblioteca.length === 0 ? "Nenhum livro cadastrado." : "Nenhum livro corresponde aos filtros."}</div>`;
+                return;
+            }
+
+            const linhas = filtrados.map(({ livro, indice }) => `
+                <tr>
+                    <td>${escapeHtml(livro.titulo)}</td>
+                    <td>${escapeHtml(livro.autor)}</td>
+                    <td>${escapeHtml(livro.tema)}</td>
+                    <td>${livro.ano}</td>
+                    <td>
+                        <span class="status-pill ${livro.emprestado ? "status-emprestado" : "status-disponivel"}">
+                            ${livro.emprestado ? "Emprestado" : "Disponivel"}
+                        </span>
+                    </td>
+                    <td>
+                        <div class="actions">
+                            <button class="btn-ghost btn-small" data-action="editar" data-indice="${indice}">Editar</button>
+                            ${livro.emprestado
+                                ? `<button class="btn-accent btn-small" data-action="devolver" data-indice="${indice}">Devolver</button>`
+                                : `<button class="btn-primary btn-small" data-action="emprestar" data-indice="${indice}">Emprestar</button>`}
+                            <button class="btn-ghost btn-small" data-action="imprimir" data-indice="${indice}">Imprimir</button>
+                            <button class="btn-danger btn-small" data-action="remover" data-indice="${indice}">Remover</button>
+                        </div>
+                    </td>
+                </tr>
+            `).join("");
+
+            container.innerHTML = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Titulo</th>
+                            <th>Autor</th>
+                            <th>Tema</th>
+                            <th>Ano</th>
+                            <th>Status</th>
+                            <th>Acoes</th>
+                        </tr>
+                    </thead>
+                    <tbody>${linhas}</tbody>
+                </table>
+            `;
+        }
+
+        function escapeHtml(texto) {
+            return (texto || "").toString().replace(/[&<>"']/g, c => ({
+                "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#39;"
+            }[c]));
+        }
+
+        // === Cadastro ===
+        document.getElementById("form-cadastro").addEventListener("submit", (e) => {
+            e.preventDefault();
+            const livro = {
+                titulo: document.getElementById("titulo").value.trim(),
+                autor: document.getElementById("autor").value.trim(),
+                tema: document.getElementById("tema").value.trim(),
+                ano: parseInt(document.getElementById("ano").value, 10),
+                emprestado: false
+            };
+            if (!livro.titulo || !livro.autor || !livro.tema || Number.isNaN(livro.ano)) {
+                toast("Preencha todos os campos.");
+                return;
+            }
+            biblioteca.push(livro);
+            salvar();
+            renderizar();
+            e.target.reset();
+            toast("Livro cadastrado com sucesso.");
+        });
+
+        // === Filtros ===
+        function executarPesquisa() {
+            const resultados = aplicarFiltros();
+            renderizar();
+            const temFiltro = ["filtro-titulo", "filtro-autor", "filtro-tema"].some(id => document.getElementById(id).value.trim())
+                || document.getElementById("filtro-status").value !== "todos";
+            if (temFiltro) {
+                toast(`${resultados.length} livro(s) encontrado(s).`);
+            }
+        }
+
+        document.getElementById("btn-pesquisar").addEventListener("click", executarPesquisa);
+
+        ["filtro-titulo", "filtro-autor", "filtro-tema"].forEach(id => {
+            document.getElementById(id).addEventListener("keydown", (e) => {
+                if (e.key === "Enter") {
+                    e.preventDefault();
+                    executarPesquisa();
+                }
+            });
+        });
+
+        document.getElementById("filtro-status").addEventListener("change", executarPesquisa);
+
+        document.getElementById("btn-limpar-filtros").addEventListener("click", () => {
+            ["filtro-titulo", "filtro-autor", "filtro-tema"].forEach(id => document.getElementById(id).value = "");
+            document.getElementById("filtro-status").value = "todos";
+            renderizar();
+        });
+
+        // === Acoes na tabela ===
+        document.getElementById("tabela-container").addEventListener("click", (e) => {
+            const botao = e.target.closest("button[data-action]");
+            if (!botao) return;
+            const indice = parseInt(botao.dataset.indice, 10);
+            const acao = botao.dataset.action;
+            const livro = biblioteca[indice];
+            if (!livro) return;
+
+            switch (acao) {
+                case "editar": abrirEdicao(indice); break;
+                case "emprestar":
+                    livro.emprestado = true;
+                    salvar(); renderizar();
+                    toast(`Livro "${livro.titulo}" emprestado.`);
+                    break;
+                case "devolver":
+                    livro.emprestado = false;
+                    salvar(); renderizar();
+                    toast(`Livro "${livro.titulo}" devolvido.`);
+                    break;
+                case "imprimir": imprimirLivro(livro); break;
+                case "remover":
+                    if (confirm(`Remover o livro "${livro.titulo}"?`)) {
+                        biblioteca.splice(indice, 1);
+                        salvar(); renderizar();
+                        toast("Livro removido.");
+                    }
+                    break;
+            }
+        });
+
+        // === Edicao ===
+        function abrirEdicao(indice) {
+            const livro = biblioteca[indice];
+            document.getElementById("edit-indice").value = indice;
+            document.getElementById("edit-titulo").value = livro.titulo;
+            document.getElementById("edit-autor").value = livro.autor;
+            document.getElementById("edit-tema").value = livro.tema;
+            document.getElementById("edit-ano").value = livro.ano;
+            document.getElementById("edit-emprestado").value = livro.emprestado ? "1" : "0";
+            document.getElementById("modal-backdrop").classList.add("active");
+        }
+
+        function fecharEdicao() {
+            document.getElementById("modal-backdrop").classList.remove("active");
+        }
+
+        document.getElementById("btn-cancelar-edicao").addEventListener("click", fecharEdicao);
+        document.getElementById("modal-backdrop").addEventListener("click", (e) => {
+            if (e.target.id === "modal-backdrop") fecharEdicao();
+        });
+
+        document.getElementById("form-edicao").addEventListener("submit", (e) => {
+            e.preventDefault();
+            const indice = parseInt(document.getElementById("edit-indice").value, 10);
+            const livro = biblioteca[indice];
+            if (!livro) { fecharEdicao(); return; }
+            livro.titulo = document.getElementById("edit-titulo").value.trim();
+            livro.autor = document.getElementById("edit-autor").value.trim();
+            livro.tema = document.getElementById("edit-tema").value.trim();
+            livro.ano = parseInt(document.getElementById("edit-ano").value, 10);
+            livro.emprestado = document.getElementById("edit-emprestado").value === "1";
+            salvar();
+            renderizar();
+            fecharEdicao();
+            toast("Livro atualizado.");
+        });
+
+        // === Impressao individual ===
+        function imprimirLivro(livro) {
+            const janela = window.open("", "_blank", "width=520,height=600");
+            janela.document.write(`
+                <html><head><title>Cadastro do Livro</title>
+                <style>
+                    body { font-family: -apple-system, sans-serif; padding: 32px; color: #222; }
+                    h1 { font-size: 18px; border-bottom: 2px solid #222; padding-bottom: 8px; }
+                    dl { margin-top: 16px; }
+                    dt { font-weight: 600; margin-top: 8px; }
+                    dd { margin: 2px 0 0; }
+                </style></head><body>
+                <h1>Cadastro do Livro</h1>
+                <dl>
+                    <dt>Titulo</dt><dd>${escapeHtml(livro.titulo)}</dd>
+                    <dt>Autor</dt><dd>${escapeHtml(livro.autor)}</dd>
+                    <dt>Tema</dt><dd>${escapeHtml(livro.tema)}</dd>
+                    <dt>Ano</dt><dd>${livro.ano}</dd>
+                    <dt>Status</dt><dd>${livro.emprestado ? "Emprestado" : "Disponivel"}</dd>
+                </dl>
+                <script>window.onload = () => window.print();<\/script>
+                </body></html>
+            `);
+            janela.document.close();
+        }
+
+        // === Importar / Exportar ===
+        document.getElementById("btn-importar").addEventListener("click", () => {
+            document.getElementById("arquivo-importar").click();
+        });
+
+        document.getElementById("arquivo-importar").addEventListener("change", (e) => {
+            const arquivo = e.target.files[0];
+            if (!arquivo) return;
+            const leitor = new FileReader();
+            leitor.onload = (ev) => {
+                try {
+                    const linhas = ev.target.result.split(/\r?\n/);
+                    const importados = [];
+                    for (const linha of linhas) {
+                        if (!linha.trim()) continue;
+                        const campos = linha.split("\t");
+                        if (campos.length !== 5) continue;
+                        const ano = parseInt(campos[3], 10);
+                        if (Number.isNaN(ano)) continue;
+                        importados.push({
+                            titulo: campos[0],
+                            autor: campos[1],
+                            tema: campos[2],
+                            ano,
+                            emprestado: campos[4].trim() === "1"
+                        });
+                    }
+                    if (importados.length === 0) {
+                        toast("Nenhum livro valido encontrado no arquivo.");
+                        return;
+                    }
+                    const subst = confirm(`Importar ${importados.length} livro(s)? OK substitui a lista atual, Cancelar adiciona ao final.`);
+                    biblioteca = subst ? importados : biblioteca.concat(importados);
+                    salvar();
+                    renderizar();
+                    toast(`${importados.length} livro(s) importado(s).`);
+                } catch {
+                    toast("Erro ao ler o arquivo.");
+                }
+                e.target.value = "";
+            };
+            leitor.readAsText(arquivo);
+        });
+
+        function exportarArquivo() {
+            if (biblioteca.length === 0) {
+                toast("Nenhum livro para exportar.");
+                return false;
+            }
+            const conteudo = biblioteca.map(l =>
+                [l.titulo, l.autor, l.tema, l.ano, l.emprestado ? "1" : "0"].join("\t")
+            ).join("\n") + "\n";
+            const blob = new Blob([conteudo], { type: "text/plain;charset=utf-8" });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.href = url;
+            link.download = "biblioteca.txt";
+            link.click();
+            URL.revokeObjectURL(url);
+            toast("Arquivo biblioteca.txt gerado.");
+            return true;
+        }
+
+        document.getElementById("btn-exportar").addEventListener("click", exportarArquivo);
+
+        document.getElementById("btn-encerrar").addEventListener("click", () => {
+            if (window.__TAURI__) {
+                window.__TAURI__.window.getCurrentWindow().close();
+                return;
+            }
+            if (biblioteca.length > 0 && confirm("Deseja exportar biblioteca.txt antes de encerrar?")) {
+                exportarArquivo();
+            }
+            window.close();
+        });
+
+        document.getElementById("btn-limpar-tudo").addEventListener("click", () => {
+            if (biblioteca.length === 0) { toast("Nada a apagar."); return; }
+            if (confirm(`Apagar todos os ${biblioteca.length} livro(s)? Esta acao nao pode ser desfeita.`)) {
+                biblioteca = [];
+                salvar();
+                renderizar();
+                toast("Biblioteca limpa.");
+            }
+        });
+
+    </script>
+</body>
+</html>
