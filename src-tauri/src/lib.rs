@@ -64,6 +64,11 @@ fn carregar_biblioteca() -> Vec<Livro> {
 }
 
 #[tauri::command]
+fn fechar_janela(window: tauri::Window) -> Result<(), String> {
+    window.close().map_err(|e| e.to_string())
+}
+
+#[tauri::command]
 fn fazer_backup(sufixo: String) -> Result<String, String> {
     let origem = caminho_arquivo();
     if !origem.exists() {
@@ -104,6 +109,7 @@ pub fn run() {
             salvar_biblioteca,
             obter_caminho_arquivo,
             fazer_backup,
+            fechar_janela,
         ])
         .run(tauri::generate_context!())
         .expect("erro ao iniciar a aplicação");

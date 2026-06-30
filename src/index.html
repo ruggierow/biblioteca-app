@@ -1067,17 +1067,26 @@
         const KEY_HANDLE = "arquivo-biblioteca";
         let biblioteca = carregar();
 
+        // Detecção robusta: __TAURI__ (withGlobalTauri) OU __TAURI_INTERNALS__ (sempre presente no WebView)
+        const IS_TAURI = typeof window.__TAURI__ !== 'undefined'
+                      || typeof window.__TAURI_INTERNALS__ !== 'undefined';
+        // Wrapper seguro para invoke — usa __TAURI__.core.invoke se disponível
+        function tauriInvoke(cmd, args) {
+            if (window.__TAURI__?.core?.invoke) return window.__TAURI__.core.invoke(cmd, args);
+            return Promise.reject(new Error('Tauri invoke não disponível'));
+        }
+
         // Tauri: sobrescreve dados do localStorage com os do arquivo nativo
         (async function inicializarTauri() {
-            if (!window.__TAURI__) return;
+            if (!IS_TAURI) return;
             try {
-                const rawLivros = await window.__TAURI__.core.invoke('carregar_biblioteca');
+                const rawLivros = await tauriInvoke('carregar_biblioteca');
                 // Converte autor/tema (strings) → autores[]/temas[] (arrays)
                 biblioteca = rawLivros.map(l => normalizarLivro(Object.assign({}, l, {
                     autores: (l.autor || '').split(';').map(s => s.trim()).filter(Boolean),
                     temas:   (l.tema  || '').split(';').map(s => s.trim()).filter(Boolean),
                 })));
-                const caminho = await window.__TAURI__.core.invoke('obter_caminho_arquivo');
+                const caminho = await tauriInvoke('obter_caminho_arquivo');
                 document.title = 'Biblioteca — ' + caminho.split(/[\\/]/).pop();
                 if (typeof atualizarTudo === 'function') atualizarTudo();
                 else if (typeof renderizar === 'function') renderizar();
@@ -1470,7 +1479,7 @@
         }
 
         function salvar() {
-            if (window.__TAURI__) {
+            if (IS_TAURI) {
                 // Converte autores[]/temas[] → strings para o backend Rust
                 const paraRust = biblioteca.map(l => ({
                     titulo:          l.titulo,
@@ -1482,7 +1491,7 @@
                     local:           l.local || '',
                     grupoLiteratura: !!l.grupoLiteratura,
                 }));
-                window.__TAURI__.core.invoke('salvar_biblioteca', { livros: paraRust })
+                tauriInvoke('salvar_biblioteca', { livros: paraRust })
                     .catch(e => console.error('Erro ao salvar:', e));
             } else {
                 localStorage.setItem(STORAGE_KEY, JSON.stringify(biblioteca));
@@ -2283,9 +2292,9 @@
         document.getElementById("btn-exportar").addEventListener("click", exportarArquivo);
 
         async function encerrarInterface() {
-            if (window.__TAURI__) {
+            if (IS_TAURI) {
                 if (!confirm("Encerrar o programa?")) return;
-                window.__TAURI__.window.getCurrentWindow().close();
+                try { await tauriInvoke('fechar_janela'); } catch(e) { console.error('fechar_janela:', e); }
                 return;
             }
 
@@ -2338,7 +2347,7 @@
 
         // === Assistente de primeiro uso ===
         (function verificarPrimeiroUso() {
-            if (window.__TAURI__) return; // Tauri cria o arquivo automaticamente
+            if (IS_TAURI) return; // Tauri cria o arquivo automaticamente
             const jaUsou = localStorage.getItem(STORAGE_KEY) !== null
                         || localStorage.getItem("biblioteca-primeiro-uso-concluido") === "1";
             if (jaUsou) return;
@@ -2373,10 +2382,10 @@
                 + "h" + String(agora.getMinutes()).padStart(2,"0");
             const nome = "biblioteca_" + sufixo + ".txt";
 
-            if (window.__TAURI__) {
+            if (IS_TAURI) {
                 // App instalável: Rust salva na mesma pasta do biblioteca.txt
                 try {
-                    const caminho = await window.__TAURI__.core.invoke('fazer_backup', { sufixo });
+                    const caminho = await tauriInvoke('fazer_backup', { sufixo });
                     toast("Backup salvo: " + caminho.split(/[\\/]/).pop());
                 } catch (e) {
                     toast("Erro no backup: " + e);
@@ -2510,7 +2519,7 @@
 
         // ── Aviso de compatibilidade com navegador ──────────────────────────
         (function verificarNavegador() {
-            if (window.__TAURI__) return;
+            if (IS_TAURI) return;
 
             const CHAVE_AVISO = "biblioteca-aviso-navegador-dispensado";
             if (localStorage.getItem(CHAVE_AVISO) === "1") return;
