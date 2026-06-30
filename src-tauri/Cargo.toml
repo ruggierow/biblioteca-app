@@ -15,7 +15,12 @@ tauri = { version = "2", features = [] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 dirs = "5"
-cookie = "=0.18.0"
+
+# Força toda a árvore de dependências a usar cookie 0.18.0.
+# cookie 0.18.1 tem um bug: chama time::parse() com 1 argumento
+# mas a versão atual do time exige 2. O patch substitui globalmente.
+[patch.crates-io]
+cookie = { git = "https://github.com/SergioBenitez/cookie-rs.git", tag = "v0.18.0" }
 
 [profile.release]
 panic = "abort"
