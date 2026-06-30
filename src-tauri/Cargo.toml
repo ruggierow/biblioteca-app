@@ -20,7 +20,7 @@ dirs = "5"
 # cookie 0.18.1 tem um bug: chama time::parse() com 1 argumento
 # mas a versão atual do time exige 2. O patch substitui globalmente.
 [patch.crates-io]
-cookie = { git = "https://github.com/SergioBenitez/cookie-rs.git", tag = "v0.18.0" }
+cookie = { git = "https://github.com/SergioBenitez/cookie-rs.git", tag = "0.18.0" }
 
 [profile.release]
 panic = "abort"
