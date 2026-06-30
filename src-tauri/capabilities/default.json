@@ -4,6 +4,8 @@
   "description": "Permissões padrão para a janela principal",
   "windows": ["main"],
   "permissions": [
-    "core:default"
+    "core:default",
+    "core:window:allow-close",
+    "core:window:allow-set-title"
   ]
 }

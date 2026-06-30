@@ -2283,6 +2283,12 @@
         document.getElementById("btn-exportar").addEventListener("click", exportarArquivo);
 
         async function encerrarInterface() {
+            if (window.__TAURI__) {
+                if (!confirm("Encerrar o programa?")) return;
+                window.__TAURI__.window.getCurrentWindow().close();
+                return;
+            }
+
             if (biblioteca.length > 0) {
                 if (arquivoHandle) {
                     const ok = await salvarNoArquivo();
@@ -2304,11 +2310,6 @@
             }
 
             if (!confirm("Encerrar a interface?")) return;
-
-            if (window.__TAURI__) {
-                window.__TAURI__.window.getCurrentWindow().close();
-                return;
-            }
 
             window.open("", "_self");
             window.close();
