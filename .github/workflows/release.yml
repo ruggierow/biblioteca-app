@@ -153,33 +153,71 @@ jobs:
           Copy-Item src-tauri\icons   deploy\icons -Recurse
           Copy-Item src-tauri\icons\icon.ico deploy\
 
-          # Launcher: abre o Edge em modo --app diretamente no GitHub Pages
-          # (sem dependência de Python ou servidor local)
-          $edgePaths = @(
-            "$env:ProgramFiles\Microsoft\Edge\Application\msedge.exe",
-            "${env:ProgramFiles(x86)}\Microsoft\Edge\Application\msedge.exe",
-            "$env:LocalAppData\Microsoft\Edge\Application\msedge.exe"
-          )
+          # Servidor HTTP local — PowerShell esta pre-instalado no Windows 10/11.
+          # Se a porta ja esta em uso (servidor anterior ainda rodando), o script
+          # sai silenciosamente; o launcher abre o Edge no servidor existente.
+          @'
+param([string]$dir, [int]$port = 49152)
+$listener = [System.Net.HttpListener]::new()
+$listener.Prefixes.Add("http://localhost:$port/")
+try { $listener.Start() } catch { exit 0 }
+$mimes = @{
+    ".html" = "text/html; charset=utf-8"
+    ".js"   = "application/javascript; charset=utf-8"
+    ".json" = "application/json; charset=utf-8"
+    ".png"  = "image/png"
+    ".ico"  = "image/x-icon"
+    ".webp" = "image/webp"
+}
+while ($listener.IsListening) {
+    try {
+        $ctx  = $listener.GetContext()
+        $lp   = $ctx.Request.Url.LocalPath.TrimStart("/")
+        if (-not $lp) { $lp = "index.html" }
+        $file = Join-Path $dir $lp
+        if (Test-Path $file -PathType Leaf) {
+            $ext = [IO.Path]::GetExtension($file).ToLower()
+            $ctx.Response.ContentType = if ($mimes[$ext]) { $mimes[$ext] } else { "application/octet-stream" }
+            $b = [IO.File]::ReadAllBytes($file)
+            $ctx.Response.ContentLength64 = $b.Length
+            $ctx.Response.OutputStream.Write($b, 0, $b.Length)
+        } else {
+            $ctx.Response.StatusCode = 404
+            $ctx.Response.ContentLength64 = 0
+        }
+        $ctx.Response.Close()
+    } catch { }
+}
+'@ | Out-File -FilePath deploy\servidor.ps1 -Encoding UTF8
+
+          # Launcher VBScript: inicia o servidor local e abre Edge em modo --app
           @"
-          Dim oShell, sEdge, sPaths, i
-          Set oShell = CreateObject("WScript.Shell")
-          sPaths = Array( _
-            oShell.ExpandEnvironmentStrings("%ProgramFiles%\Microsoft\Edge\Application\msedge.exe"), _
-            oShell.ExpandEnvironmentStrings("%ProgramFiles(x86)%\Microsoft\Edge\Application\msedge.exe"), _
-            oShell.ExpandEnvironmentStrings("%LocalAppData%\Microsoft\Edge\Application\msedge.exe"))
-          sEdge = ""
-          For i = 0 To UBound(sPaths)
-            If CreateObject("Scripting.FileSystemObject").FileExists(sPaths(i)) Then
-              sEdge = sPaths(i)
-              Exit For
-            End If
-          Next
-          If sEdge <> "" Then
-            oShell.Run """" & sEdge & """ --app=https://ruggierow.github.io/biblioteca-app/ --profile-directory=Biblioteca --no-first-run --disable-notifications --disable-default-apps --disable-features=DialMediaRouteProvider"
-          Else
-            oShell.Run "start https://ruggierow.github.io/biblioteca-app/"
-          End If
-          "@ | Out-File -FilePath deploy\Biblioteca.vbs -Encoding UTF8
+Dim oShell, oFSO, sDir, sEdge, sPaths, i
+Set oShell = CreateObject("WScript.Shell")
+Set oFSO   = CreateObject("Scripting.FileSystemObject")
+sDir = oFSO.GetParentFolderName(WScript.ScriptFullName)
+
+oShell.Run "powershell.exe -WindowStyle Hidden -ExecutionPolicy Bypass -File """ & sDir & "\servidor.ps1"" """ & sDir & """ 49152", 0, False
+WScript.Sleep 1200
+
+sPaths = Array( _
+  oShell.ExpandEnvironmentStrings("%ProgramFiles%\Microsoft\Edge\Application\msedge.exe"), _
+  oShell.ExpandEnvironmentStrings("%ProgramFiles(x86)%\Microsoft\Edge\Application\msedge.exe"), _
+  oShell.ExpandEnvironmentStrings("%LocalAppData%\Microsoft\Edge\Application\msedge.exe"))
+sEdge = ""
+For i = 0 To UBound(sPaths)
+  If oFSO.FileExists(sPaths(i)) Then
+    sEdge = sPaths(i)
+    Exit For
+  End If
+Next
+
+If sEdge <> "" Then
+  oShell.Run """" & sEdge & """ --app=http://localhost:49152/ --profile-directory=Biblioteca --no-first-run --disable-notifications --disable-default-apps --disable-features=DialMediaRouteProvider"
+Else
+  oShell.Run "start https://ruggierow.github.io/biblioteca-app/"
+End If
+"@ | Out-File -FilePath deploy\Biblioteca.vbs -Encoding UTF8
 
       - name: Escrever script NSIS
         shell: pwsh
@@ -284,7 +322,7 @@ jobs:
 
             ### Instalação no Windows
             1. Executar `Biblioteca-Windows-Setup.exe`
-            2. Requer **Microsoft Edge** (pré-instalado no Windows 10/11) e **Python 3**
+            2. Requer apenas **Microsoft Edge** (pré-instalado no Windows 10/11)
 
             ### Sem instalação
             Chrome: https://ruggierow.github.io/biblioteca-app/
