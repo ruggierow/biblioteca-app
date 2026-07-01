@@ -153,16 +153,33 @@ jobs:
           Copy-Item src-tauri\icons   deploy\icons -Recurse
           Copy-Item src-tauri\icons\icon.ico deploy\
 
-          # Launcher: inicia servidor Python e abre o Edge em modo --app
-          @'
-          Dim oShell, oFSO, sDir
+          # Launcher: abre o Edge em modo --app diretamente no GitHub Pages
+          # (sem dependência de Python ou servidor local)
+          $edgePaths = @(
+            "$env:ProgramFiles\Microsoft\Edge\Application\msedge.exe",
+            "${env:ProgramFiles(x86)}\Microsoft\Edge\Application\msedge.exe",
+            "$env:LocalAppData\Microsoft\Edge\Application\msedge.exe"
+          )
+          @"
+          Dim oShell, sEdge, sPaths, i
           Set oShell = CreateObject("WScript.Shell")
-          Set oFSO   = CreateObject("Scripting.FileSystemObject")
-          sDir = oFSO.GetParentFolderName(WScript.ScriptFullName)
-          oShell.Run "cmd /c python -m http.server 49152 --directory """ & sDir & """ --bind 127.0.0.1", 0, False
-          WScript.Sleep 600
-          oShell.Run "msedge --app=http://localhost:49152/index.html --profile-directory=Biblioteca --no-first-run"
-          '@ | Out-File -FilePath deploy\Biblioteca.vbs -Encoding UTF8
+          sPaths = Array( _
+            oShell.ExpandEnvironmentStrings("%ProgramFiles%\Microsoft\Edge\Application\msedge.exe"), _
+            oShell.ExpandEnvironmentStrings("%ProgramFiles(x86)%\Microsoft\Edge\Application\msedge.exe"), _
+            oShell.ExpandEnvironmentStrings("%LocalAppData%\Microsoft\Edge\Application\msedge.exe"))
+          sEdge = ""
+          For i = 0 To UBound(sPaths)
+            If CreateObject("Scripting.FileSystemObject").FileExists(sPaths(i)) Then
+              sEdge = sPaths(i)
+              Exit For
+            End If
+          Next
+          If sEdge <> "" Then
+            oShell.Run """" & sEdge & """ --app=https://ruggierow.github.io/biblioteca-app/ --profile-directory=Biblioteca --no-first-run"
+          Else
+            oShell.Run "start https://ruggierow.github.io/biblioteca-app/"
+          End If
+          "@ | Out-File -FilePath deploy\Biblioteca.vbs -Encoding UTF8
 
       - name: Escrever script NSIS
         shell: pwsh
