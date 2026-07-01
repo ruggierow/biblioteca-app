@@ -2290,6 +2290,52 @@
             janela.document.close();
         }
 
+        // === Filtro interno da secao Temas e Autores ===
+        function filtrarChips() {
+            const ft = normalizar(document.getElementById("filtro-chip-tema").value);
+            const fa = normalizar(document.getElementById("filtro-chip-autor").value);
+            document.querySelectorAll("#lista-temas .chip").forEach(chip => {
+                chip.style.display = (ft && !normalizar(chip.dataset.valor || "").includes(ft)) ? "none" : "";
+            });
+            document.querySelectorAll("#lista-autores .chip").forEach(chip => {
+                chip.style.display = (fa && !normalizar(chip.dataset.valor || "").includes(fa)) ? "none" : "";
+            });
+        }
+        document.getElementById("filtro-chip-tema").addEventListener("input", filtrarChips);
+        document.getElementById("filtro-chip-autor").addEventListener("input", filtrarChips);
+
+        // === Clique em chip de tema/autor filtra a tabela ===
+        document.querySelector(".colunas-2").addEventListener("click", (e) => {
+            const chip = e.target.closest(".chip");
+            if (!chip) return;
+            const tipo = chip.dataset.tipo;
+            const valor = chip.dataset.valor;
+            ["filtro-titulo", "filtro-autor", "filtro-tema", "filtro-local"].forEach(id => document.getElementById(id).value = "");
+            document.getElementById("filtro-status").value = "todos";
+            if (tipo === "tema") {
+                document.getElementById("filtro-tema").value = valor;
+            } else if (tipo === "autor") {
+                document.getElementById("filtro-autor").value = valor;
+            }
+            executarPesquisa();
+            document.querySelector(".card:has(#tabela-container)")?.scrollIntoView({ behavior: "smooth", block: "start" });
+        });
+
+        // === Botoes "+ Adicionar" para autores e temas ===
+        function ligarBotaoAdicionar(seletor, tipo) {
+            document.querySelectorAll(seletor).forEach(botao => {
+                botao.addEventListener("click", () => {
+                    const containerId = botao.dataset.target;
+                    const container = document.getElementById(containerId);
+                    const novaLinha = criarLinhaCampo("", containerId, tipo);
+                    container.appendChild(novaLinha);
+                    novaLinha.querySelector("input").focus();
+                });
+            });
+        }
+        ligarBotaoAdicionar(".btn-add-autor", "autor");
+        ligarBotaoAdicionar(".btn-add-tema", "tema");
+
         document.getElementById("btn-imprimir-resultados").addEventListener("click", imprimirResultados);
 
         // === Importar / Exportar ===
