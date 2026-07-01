@@ -2686,7 +2686,13 @@
     </script>
     <script>
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('./sw.js').catch(() => {});
+            if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+                // Em localhost: remove SWs antigos (evita cache stale da versão anterior)
+                navigator.serviceWorker.getRegistrations().then(regs => regs.forEach(r => r.unregister()));
+            } else {
+                // No GitHub Pages: registra normalmente para suporte offline
+                navigator.serviceWorker.register('./sw.js').catch(() => {});
+            }
         }
     </script>
 </body>
