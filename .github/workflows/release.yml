@@ -1,63 +1,256 @@
-name: Release
+name: Build & Release
 
 on:
   push:
-    tags:
-      - 'v*'
+    tags: [ 'v*' ]
+  workflow_dispatch:
 
+# ══════════════════════════════════════════════════════════════════════════
+# macOS — Biblioteca.app + DMG
+# Inicia servidor HTTP local (python3, incluído no macOS) com os arquivos
+# do site e abre o Chrome/Edge/Brave em modo --app (sem barra de navegador).
+# ══════════════════════════════════════════════════════════════════════════
 jobs:
-  release:
-    permissions:
-      contents: write
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - os: macos-latest
-            args: --target universal-apple-darwin
-          - os: windows-latest
-            args: ''
-
-    runs-on: ${{ matrix.os }}
+  build-macos:
+    name: macOS DMG
+    runs-on: macos-latest
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      - name: Criar Biblioteca.app
+        run: |
+          set -e
+          APP="Biblioteca.app"
+          MACOS="$APP/Contents/MacOS"
+          RES="$APP/Contents/Resources"
+          mkdir -p "$MACOS" "$RES"
+
+          cp src/index.html src/manifest.json src/sw.js "$RES/"
+          cp -r src-tauri/icons "$RES/icons"
+          cp src-tauri/icons/icon.icns "$RES/"
+
+          VERSION="${GITHUB_REF_NAME#v}"
+          [ -z "$VERSION" ] && VERSION="0.0.0"
+
+          cat > "$APP/Contents/Info.plist" <<PLIST
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+            "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0"><dict>
+            <key>CFBundleName</key>             <string>Biblioteca</string>
+            <key>CFBundleDisplayName</key>      <string>Biblioteca</string>
+            <key>CFBundleIdentifier</key>       <string>com.ruggierow.biblioteca</string>
+            <key>CFBundleVersion</key>          <string>${VERSION}</string>
+            <key>CFBundleShortVersionString</key><string>${VERSION}</string>
+            <key>CFBundleExecutable</key>       <string>Biblioteca</string>
+            <key>CFBundleIconFile</key>         <string>icon</string>
+            <key>CFBundlePackageType</key>      <string>APPL</string>
+            <key>LSMinimumSystemVersion</key>   <string>10.15</string>
+            <key>NSHighResolutionCapable</key>  <true/>
+          </dict></plist>
+          PLIST
+
+          cat > "$MACOS/Biblioteca" <<'LAUNCHER'
+          #!/bin/bash
+          set -e
+          RESOURCES="$(cd "$(dirname "$0")/../Resources" && pwd)"
+          PORT=49152
+          PIDFILE="$TMPDIR/biblioteca-server.pid"
+
+          # Para servidor anterior se ainda estiver rodando
+          if [ -f "$PIDFILE" ]; then
+              kill "$(cat "$PIDFILE")" 2>/dev/null || true
+          fi
+
+          # Inicia servidor HTTP local em background
+          python3 -m http.server $PORT \
+              --directory "$RESOURCES" \
+              --bind 127.0.0.1 \
+              > /dev/null 2>&1 &
+          echo $! > "$PIDFILE"
+          sleep 0.5
+
+          URL="http://localhost:$PORT/index.html"
+
+          # Abre em modo --app (janela sem barra de navegador)
+          CHROME="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+          EDGE="/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge"
+          BRAVE="/Applications/Brave Browser.app/Contents/MacOS/Brave Browser"
+
+          if   [ -f "$CHROME" ]; then BIN="$CHROME"
+          elif [ -f "$EDGE"   ]; then BIN="$EDGE"
+          elif [ -f "$BRAVE"  ]; then BIN="$BRAVE"
+          else open "$URL"; wait; exit 0
+          fi
+
+          # Perfil dedicado garante que localStorage/IndexedDB persistam
+          # entre sessões sem interferir com o perfil principal do browser
+          "$BIN" \
+              --app="$URL" \
+              --profile-directory="Biblioteca" \
+              --no-first-run &
+          BROWSER_PID=$!
+
+          # Mantém processo vivo até o browser fechar, depois mata servidor
+          wait $BROWSER_PID 2>/dev/null || true
+          kill "$(cat "$PIDFILE" 2>/dev/null)" 2>/dev/null || true
+          LAUNCHER
+          chmod +x "$MACOS/Biblioteca"
+
+          codesign --force --deep --sign - "$APP"
+          xattr -cr "$APP"
+
+      - name: Criar DMG
+        run: |
+          hdiutil create \
+            -volname "Biblioteca" \
+            -srcfolder "Biblioteca.app" \
+            -ov -format UDZO \
+            Biblioteca-macOS.dmg
+
+      - uses: actions/upload-artifact@v4
         with:
-          node-version: 20
+          name: Biblioteca-macOS
+          path: Biblioteca-macOS.dmg
 
-      - name: Install Rust
-        uses: dtolnay/rust-toolchain@stable
+# ══════════════════════════════════════════════════════════════════════════
+# Windows — instalador NSIS
+# Instala os arquivos do site e um launcher VBScript que inicia o servidor
+# HTTP local e abre o Edge (pré-instalado no Windows 10/11) em modo --app.
+# ══════════════════════════════════════════════════════════════════════════
+  build-windows:
+    name: Windows NSIS
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Preparar arquivos do site
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path deploy | Out-Null
+          Copy-Item src\index.html    deploy\
+          Copy-Item src\manifest.json deploy\
+          Copy-Item src\sw.js         deploy\
+          Copy-Item src-tauri\icons   deploy\icons -Recurse
+          Copy-Item src-tauri\icons\icon.ico deploy\
+
+          # Launcher: inicia servidor Python e abre o Edge em modo --app
+          @'
+          Dim oShell, oFSO, sDir
+          Set oShell = CreateObject("WScript.Shell")
+          Set oFSO   = CreateObject("Scripting.FileSystemObject")
+          sDir = oFSO.GetParentFolderName(WScript.ScriptFullName)
+          oShell.Run "cmd /c python -m http.server 49152 --directory """ & sDir & """ --bind 127.0.0.1", 0, False
+          WScript.Sleep 600
+          oShell.Run "msedge --app=http://localhost:49152/index.html --profile-directory=Biblioteca --no-first-run"
+          '@ | Out-File -FilePath deploy\Biblioteca.vbs -Encoding UTF8
+
+      - name: Escrever script NSIS
+        shell: pwsh
+        run: |
+          $ver = "${{ github.ref_name }}".TrimStart('v')
+          if (-not $ver) { $ver = "0.0.0" }
+          @"
+          Unicode true
+          !define APP_NAME    "Biblioteca"
+          !define APP_VERSION "$ver"
+          !define PUBLISHER   "Prof. Wilson Ruggiero - USP"
+          !define REG_KEY     "Software\Microsoft\Windows\CurrentVersion\Uninstall\Biblioteca"
+
+          Name            "`${APP_NAME} `${APP_VERSION}"
+          OutFile         "Biblioteca-Windows-Setup.exe"
+          InstallDir      "`$LOCALAPPDATA\Biblioteca"
+          InstallDirRegKey HKCU "`${REG_KEY}" "InstallDir"
+          RequestExecutionLevel user
+          SetCompressor   /SOLID lzma
+
+          !define MUI_ICON   "deploy\icon.ico"
+          !define MUI_UNICON "deploy\icon.ico"
+          !include "MUI2.nsh"
+          !define MUI_ABORTWARNING
+          !insertmacro MUI_PAGE_WELCOME
+          !insertmacro MUI_PAGE_DIRECTORY
+          !insertmacro MUI_PAGE_INSTFILES
+          !insertmacro MUI_PAGE_FINISH
+          !insertmacro MUI_UNPAGE_CONFIRM
+          !insertmacro MUI_UNPAGE_INSTFILES
+          !insertmacro MUI_LANGUAGE "PortugueseBR"
+
+          Section "Programa" SecMain
+            SectionIn RO
+            SetOutPath "`$INSTDIR"
+            File /r "deploy\*.*"
+            CreateShortcut "`$DESKTOP\`${APP_NAME}.lnk" "wscript.exe" '"`$INSTDIR\Biblioteca.vbs"' "`$INSTDIR\icon.ico" 0
+            CreateDirectory "`$SMPROGRAMS\`${APP_NAME}"
+            CreateShortcut "`$SMPROGRAMS\`${APP_NAME}\`${APP_NAME}.lnk" "wscript.exe" '"`$INSTDIR\Biblioteca.vbs"' "`$INSTDIR\icon.ico" 0
+            CreateShortcut "`$SMPROGRAMS\`${APP_NAME}\Desinstalar.lnk" "`$INSTDIR\Uninstall.exe"
+            WriteUninstaller "`$INSTDIR\Uninstall.exe"
+            WriteRegStr HKCU "`${REG_KEY}" "DisplayName"     "`${APP_NAME}"
+            WriteRegStr HKCU "`${REG_KEY}" "DisplayVersion"  "`${APP_VERSION}"
+            WriteRegStr HKCU "`${REG_KEY}" "Publisher"       "`${PUBLISHER}"
+            WriteRegStr HKCU "`${REG_KEY}" "InstallDir"      "`$INSTDIR"
+            WriteRegStr HKCU "`${REG_KEY}" "UninstallString" "`$INSTDIR\Uninstall.exe"
+          SectionEnd
+
+          Section "Uninstall"
+            Delete "`$DESKTOP\`${APP_NAME}.lnk"
+            RMDir /r "`$SMPROGRAMS\`${APP_NAME}"
+            RMDir /r "`$INSTDIR"
+            DeleteRegKey HKCU "`${REG_KEY}"
+          SectionEnd
+          "@ | Out-File -FilePath installer.nsi -Encoding UTF8
+
+      - name: Instalar NSIS
+        run: choco install nsis --yes --no-progress
+
+      - name: Compilar instalador
+        run: '& "C:\Program Files (x86)\NSIS\makensis.exe" installer.nsi'
+        shell: pwsh
+
+      - uses: actions/upload-artifact@v4
         with:
-          targets: ${{ matrix.os == 'macos-latest' && 'aarch64-apple-darwin,x86_64-apple-darwin' || '' }}
+          name: Biblioteca-Windows
+          path: Biblioteca-Windows-Setup.exe
 
-      - name: Rust cache
-        uses: swatinem/rust-cache@v2
+# ══════════════════════════════════════════════════════════════════════════
+# Release — publica artefatos no GitHub ao criar tag v*
+# ══════════════════════════════════════════════════════════════════════════
+  release:
+    name: Publicar Release
+    needs: [ build-macos, build-windows ]
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/download-artifact@v4
         with:
-          workspaces: './src-tauri -> target'
+          merge-multiple: true
+          path: artifacts/
 
-      - name: Install frontend deps
-        run: npm install
-
-      - name: Build and release
-        uses: tauri-apps/tauri-action@v0
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: softprops/action-gh-release@v2
         with:
-          tagName: ${{ github.ref_name }}
-          releaseName: 'Biblioteca ${{ github.ref_name }}'
-          releaseBody: |
-            ## Instalação
+          files: artifacts/*
+          name: "Biblioteca ${{ github.ref_name }}"
+          body: |
+            ## Sistema de Gestão de Biblioteca — ${{ github.ref_name }}
 
-            | Plataforma | Ficheiro |
+            | Plataforma | Arquivo |
             |---|---|
-            | macOS (M1/M2/Intel — Universal) | `.dmg` |
-            | Windows | `.msi` ou `.exe` |
+            | macOS 10.15+ | `Biblioteca-macOS.dmg` |
+            | Windows 10/11 | `Biblioteca-Windows-Setup.exe` |
 
-            Faça download do ficheiro correspondente ao seu sistema e siga as instruções de instalação.
-            Os dados ficam guardados em `~/Documents/biblioteca.txt` (mesmo formato do programa em C++).
-          releaseDraft: false
-          prerelease: false
-          args: ${{ matrix.args }}
+            ### Instalação no macOS
+            1. Abrir o `.dmg` e arrastar **Biblioteca** para Aplicativos
+            2. Primeira execução: botão direito → **Abrir** → **Abrir mesmo assim**
+            3. Requer **Chrome**, **Edge** ou **Brave** instalado
+
+            ### Instalação no Windows
+            1. Executar `Biblioteca-Windows-Setup.exe`
+            2. Requer **Microsoft Edge** (pré-instalado no Windows 10/11) e **Python 3**
+
+            ### Sem instalação
+            Chrome: https://ruggierow.github.io/biblioteca-app/

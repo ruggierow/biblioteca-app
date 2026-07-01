@@ -1,0 +1,19 @@
+// Service Worker mínimo — necessário para o Chrome mostrar o botão "Instalar"
+const CACHE = 'biblioteca-v1';
+
+self.addEventListener('install', e => {
+    e.waitUntil(
+        caches.open(CACHE).then(c => c.addAll(['./index.html', './manifest.json']))
+    );
+    self.skipWaiting();
+});
+
+self.addEventListener('activate', e => {
+    e.waitUntil(clients.claim());
+});
+
+self.addEventListener('fetch', e => {
+    e.respondWith(
+        fetch(e.request).catch(() => caches.match(e.request))
+    );
+});
