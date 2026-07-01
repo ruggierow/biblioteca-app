@@ -2412,7 +2412,13 @@
 
         // === Assistente de primeiro uso ===
         (function verificarPrimeiroUso() {
-            if (IS_TAURI) return; // Tauri cria o arquivo automaticamente
+            if (IS_TAURI) return;
+            // Em modo --app (Edge/Chrome sem barra de navegador) o modal não é necessário
+            // e bloquearia interação com os campos antes de ser percebido pelo usuário.
+            if (window.matchMedia('(display-mode: standalone)').matches) {
+                localStorage.setItem("biblioteca-primeiro-uso-concluido", "1");
+                return;
+            }
             const jaUsou = localStorage.getItem(STORAGE_KEY) !== null
                         || localStorage.getItem("biblioteca-primeiro-uso-concluido") === "1";
             if (jaUsou) return;

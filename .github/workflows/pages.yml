@@ -25,6 +25,9 @@ jobs:
       - name: Configura Pages
         uses: actions/configure-pages@v5
 
+      - name: Copia ícones para o site
+        run: cp -r src-tauri/icons src/icons
+
       - name: Envia artefato
         uses: actions/upload-pages-artifact@v3
         with:

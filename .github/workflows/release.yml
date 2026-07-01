@@ -175,7 +175,7 @@ jobs:
             End If
           Next
           If sEdge <> "" Then
-            oShell.Run """" & sEdge & """ --app=https://ruggierow.github.io/biblioteca-app/ --profile-directory=Biblioteca --no-first-run"
+            oShell.Run """" & sEdge & """ --app=https://ruggierow.github.io/biblioteca-app/ --profile-directory=Biblioteca --no-first-run --disable-notifications --disable-default-apps --disable-features=DialMediaRouteProvider"
           Else
             oShell.Run "start https://ruggierow.github.io/biblioteca-app/"
           End If
