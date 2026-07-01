@@ -2541,6 +2541,11 @@
             }
         });
 
+        // === Inicialização ===
+        popularCampos("autores-container", [], "autor");
+        popularCampos("temas-container", [], "tema");
+        atualizarTudo();
+
         document.getElementById("btn-backup-json").addEventListener("click", () => {
             const conteudo = JSON.stringify(biblioteca, null, 2);
             const blob = new Blob([conteudo], { type: "application/json;charset=utf-8" });
