@@ -683,17 +683,23 @@
             padding: 24px;
             width: min(92vw, 480px);
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
         }
 
-        .modal h3 { margin: 0 0 16px; font-size: 17px; }
+        .modal h3 { margin: 0 0 16px; font-size: 17px; flex-shrink: 0; }
 
-        .modal .form-grid { grid-template-columns: 1fr; }
+        .modal form { display: flex; flex-direction: column; flex: 1; min-height: 0; }
+
+        .modal .form-grid { grid-template-columns: 1fr; overflow-y: auto; flex: 1; min-height: 0; }
 
         .modal-actions {
             display: flex;
             justify-content: flex-end;
             gap: 8px;
             margin-top: 16px;
+            flex-shrink: 0;
         }
 
         /* Toast */
