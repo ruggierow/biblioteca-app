@@ -26,12 +26,19 @@ jobs:
           RES="$APP/Contents/Resources"
           mkdir -p "$MACOS" "$RES"
 
+          VERSION="${GITHUB_REF_NAME#v}"
+          [ -z "$VERSION" ] && VERSION="0.0.0"
+
+          # Injeta versão no HTML antes de empacotar
+          sed -i '' \
+            -e "s/APP_VERSION = '[^']*'/APP_VERSION = '$VERSION'/" \
+            -e "s/>v[0-9][^<]*<\/span>/>v$VERSION<\/span>/" \
+            -e "s/v[0-9][0-9.]*<\/title>/v$VERSION<\/title>/" \
+            src/index.html
+
           cp src/index.html src/manifest.json src/sw.js "$RES/"
           cp -r src-tauri/icons "$RES/icons"
           cp src-tauri/icons/icon.icns "$RES/"
-
-          VERSION="${GITHUB_REF_NAME#v}"
-          [ -z "$VERSION" ] && VERSION="0.0.0"
 
           cat > "$APP/Contents/Info.plist" <<PLIST
           <?xml version="1.0" encoding="UTF-8"?>
@@ -129,6 +136,16 @@ jobs:
       - name: Preparar arquivos do site
         shell: pwsh
         run: |
+          $ver = "${{ github.ref_name }}".TrimStart('v')
+          if (-not $ver) { $ver = "0.0.0" }
+
+          # Injeta versão no HTML antes de empacotar
+          $html = Get-Content src\index.html -Raw -Encoding UTF8
+          $html = $html -replace "APP_VERSION = '[^']*'", "APP_VERSION = '$ver'"
+          $html = $html -replace ">v[\d][^<]*</span>", ">v$ver</span>"
+          $html = $html -replace "v[\d][\d.]*</title>", "v$ver</title>"
+          $html | Set-Content src\index.html -Encoding UTF8
+
           New-Item -ItemType Directory -Force -Path deploy | Out-Null
           Copy-Item src\index.html    deploy\
           Copy-Item src\manifest.json deploy\
